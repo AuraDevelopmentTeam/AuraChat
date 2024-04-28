@@ -5,7 +5,8 @@ A flow based Minecraft chat plugin.
 ## Concept
 
 The core idea is that every incoming message or chat command gets processed through a flow diagram that's editable by
-the server admins.
+the server admins.  
+The interface should look similar to that of Node-RED.
 
 ### Nodes
 
@@ -45,7 +46,7 @@ To allow more advanced message flow there can be several variables.
 - Types:
     - String: Variable can be any string.
     - Text Component: A text component object, as used by Minecraft itself.
-    - Number: Variables can be a number (probably one for ints and floats).
+    - Number: Variables can be a number (probably one for integers and floats).
     - Enums: Variables can be one of a few possible states.
     - Player: A player.
     - Optional: A variable that can either hold a value of a defined type or hold no value at all.
@@ -137,5 +138,5 @@ flowchart LR
 ```
 
 This chart represents a configuration where players can chat either locally on a server or globally. They can switch
-back and forth between the two channels at will and also send messages directly to the channels. Also they have a simple
-direct message system, with a quick reply feature.
+back and forth between the two channels at will and also send messages directly to the channels. Also, they have a
+simple direct message system, with a quick reply feature.
