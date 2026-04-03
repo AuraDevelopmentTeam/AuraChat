@@ -81,3 +81,9 @@ $RECYCLE.BIN/
 
 run
 *.lang.txt
+
+#################
+## Node
+#################
+
+node_modules/
