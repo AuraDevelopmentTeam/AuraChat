@@ -1,21 +1,17 @@
 import { memo } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
-import { NodeDefinition, ConnectionType } from '../types/schema';
+import { NodeDefinition, VariableDefinition } from '../types/schema';
 
 export const GenericNode = memo(({ data }: NodeProps<{ 
     definition: NodeDefinition; 
     parameters: Record<string, any>; 
     onChange: (params: Record<string, any>) => void;
-    connectionTypes: ConnectionType[];
+    availableVariables: VariableDefinition[];
 }>) => {
-    const { definition, parameters, onChange, connectionTypes } = data;
+    const { definition, parameters, onChange, availableVariables } = data;
 
     const handleParamChange = (id: string, value: any) => {
         onChange({ ...parameters, [id]: value });
-    };
-
-    const getConnectionColor = (typeId: string) => {
-        return connectionTypes.find(t => t.id === typeId)?.color || '#555';
     };
 
     return (
@@ -35,7 +31,6 @@ export const GenericNode = memo(({ data }: NodeProps<{
                                     position={Position.Left}
                                     id={input.id}
                                     className="aura-handle"
-                                    style={{ backgroundColor: getConnectionColor(input.connectionTypeId) }}
                                 />
                                 <span className="aura-handle-label">{input.label}</span>
                             </div>
@@ -51,7 +46,6 @@ export const GenericNode = memo(({ data }: NodeProps<{
                                     position={Position.Right}
                                     id={output.id}
                                     className="aura-handle"
-                                    style={{ backgroundColor: getConnectionColor(output.connectionTypeId) }}
                                 />
                             </div>
                         ))}
@@ -63,11 +57,25 @@ export const GenericNode = memo(({ data }: NodeProps<{
                         {definition.parameters.map((param) => (
                             <div key={param.id} className="aura-node__field">
                                 <label>{param.label}</label>
-                                {param.type === 'string' && (
+                                {(param.type === 'string' || param.type === 'player') && (
                                     <input 
                                         type="text" 
                                         value={parameters[param.id] || ''} 
                                         onChange={(e) => handleParamChange(param.id, e.target.value)}
+                                    />
+                                )}
+                                {param.type === 'number' && (
+                                    <input 
+                                        type="number" 
+                                        value={parameters[param.id] || 0} 
+                                        onChange={(e) => handleParamChange(param.id, parseFloat(e.target.value))}
+                                    />
+                                )}
+                                {param.type === 'boolean' && (
+                                    <input 
+                                        type="checkbox" 
+                                        checked={!!parameters[param.id]} 
+                                        onChange={(e) => handleParamChange(param.id, e.target.checked)}
                                     />
                                 )}
                                 {param.type === 'enum' && param.options && (
@@ -77,6 +85,15 @@ export const GenericNode = memo(({ data }: NodeProps<{
                                     >
                                         <option value="">Select...</option>
                                         {param.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                    </select>
+                                )}
+                                {param.type === 'variable' && (
+                                    <select 
+                                        value={parameters[param.id] || ''} 
+                                        onChange={(e) => handleParamChange(param.id, e.target.value)}
+                                    >
+                                        <option value="">Select Variable...</option>
+                                        {availableVariables?.map(v => <option key={v.id} value={v.name}>{v.name}</option>)}
                                     </select>
                                 )}
                             </div>

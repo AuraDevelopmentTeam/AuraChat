@@ -4,16 +4,9 @@ export enum NodeType {
     TERMINATION = 'TERMINATION'
 }
 
-export interface ConnectionType {
-    id: string;
-    label: string;
-    color: string;
-}
-
 export interface NodeSocket {
     id: string;
     label: string;
-    connectionTypeId: string;
 }
 
 export interface NodeDefinition {
@@ -33,6 +26,18 @@ export interface ParameterDefinition {
     label: string;
     type: 'string' | 'number' | 'boolean' | 'enum' | 'player' | 'variable';
     options?: string[]; // For enums
+    defaultValue?: any;
+}
+
+export interface VariableDefinition {
+    id: string;
+    name: string;
+    variant: 'global' | 'player';
+    scope: 'global' | 'per_world_server';
+    persistence: 'persistent' | 'volatile';
+    type: 'string' | 'text_component' | 'number' | 'enum' | 'player' | 'boolean';
+    options?: string[]; // For enums
+    defaultValue?: any;
 }
 
 export interface AuraFlowNode {
@@ -45,9 +50,9 @@ export interface AuraFlowNode {
 
 export interface AuraSchema {
     types: {
-        connection: ConnectionType[];
         node: NodeDefinition[];
     };
+    variables: VariableDefinition[];
     flow: {
         nodes: AuraFlowNode[];
     };

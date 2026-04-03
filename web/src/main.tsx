@@ -4,7 +4,6 @@ import App from './App'
 import 'reactflow/dist/style.css';
 import './index.css'
 
-console.log('Mounting AuraChat Editor...');
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />

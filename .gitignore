@@ -87,3 +87,4 @@ run
 #################
 
 node_modules/
+dist/

@@ -13,7 +13,6 @@ import ReactFlow, {
     OnConnect,
     OnNodesChange,
     OnEdgesChange,
-    IsValidConnection,
 } from 'reactflow';
 
 import { GenericNode } from './components/GenericNode';
@@ -30,6 +29,8 @@ const App: React.FC = () => {
     const initialSchema = useMemo(() => loadFlow(), []);
     const { nodes: initialNodes, edges: initialEdges } = useMemo(() => auraToReactFlow(initialSchema), [initialSchema]);
 
+    const [variables] = useState(initialSchema.variables);
+
     const updateNodeData = useCallback((nodeId: string, newParams: Record<string, any>) => {
         setNodes((nds) => nds.map((node) => {
             if (node.id === nodeId) {
@@ -44,6 +45,7 @@ const App: React.FC = () => {
             ...node,
             data: { 
                 ...node.data, 
+                availableVariables: variables,
                 onChange: (newParams: any) => updateNodeData(node.id, newParams) 
             }
         }))
@@ -62,18 +64,6 @@ const App: React.FC = () => {
         (params: Connection) => setEdges((eds) => addEdge(params, eds)),
         [setEdges]
     );
-
-    const isValidConnection: IsValidConnection = useCallback((connection) => {
-        const sourceNode = nodes.find((n) => n.id === connection.source);
-        const targetNode = nodes.find((n) => n.id === connection.target);
-
-        if (!sourceNode || !targetNode) return false;
-
-        const sourceOutput = sourceNode.data.definition.outputs.find((o: any) => o.id === connection.sourceHandle);
-        const targetInput = targetNode.data.definition.inputs.find((i: any) => i.id === connection.targetHandle);
-
-        return sourceOutput?.connectionTypeId === targetInput?.connectionTypeId;
-    }, [nodes]);
 
     const onDragStart = (event: React.DragEvent, nodeDef: NodeDefinition) => {
         event.dataTransfer.setData('application/reactflow', JSON.stringify(nodeDef));
@@ -104,14 +94,14 @@ const App: React.FC = () => {
                 data: { 
                     definition, 
                     parameters: {},
-                    connectionTypes: initialSchema.types.connection,
+                    availableVariables: variables,
                     onChange: (newParams: Record<string, any>) => updateNodeData(nodeId, newParams)
                 },
             };
 
             setNodes((nds) => nds.concat(newNode));
         },
-        [setNodes, updateNodeData, initialSchema.types.connection]
+        [setNodes, updateNodeData]
     );
 
     const onDragOver = useCallback((event: React.DragEvent) => {
@@ -120,7 +110,7 @@ const App: React.FC = () => {
     }, []);
 
     const handleSave = () => {
-        const schema = reactFlowToAura(nodes, edges, initialSchema.types);
+        const schema = reactFlowToAura(nodes, edges, initialSchema.types, variables);
         saveFlow(schema);
     };
 
@@ -130,6 +120,15 @@ const App: React.FC = () => {
                 <div className="aura-sidebar__header">AuraChat Editor</div>
                 <div className="aura-sidebar__toolbar">
                     <button onClick={handleSave} className="aura-btn aura-btn--primary">Save Flow</button>
+                </div>
+                <div className="aura-sidebar__section">
+                    <div className="aura-sidebar__label">Variables</div>
+                    {variables.map((v) => (
+                        <div key={v.id} className="aura-variable-item">
+                            <span className="aura-variable-item__name">{v.name}</span>
+                            <span className="aura-variable-item__details">{v.type} ({v.variant})</span>
+                        </div>
+                    ))}
                 </div>
                 <div className="aura-sidebar__section">
                     <div className="aura-sidebar__label">Available Nodes</div>
@@ -155,7 +154,6 @@ const App: React.FC = () => {
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
                     nodeTypes={nodeTypes}
-                    isValidConnection={isValidConnection}
                     fitView
                 >
                     <Background color="#333" gap={20} />
